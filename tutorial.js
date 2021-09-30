@@ -18,7 +18,9 @@ version comments
 
  */
 let font
-let vertices
+let vertices = []
+
+
 
 function preload() {
     font = loadFont('fonts/Meiryo-01.ttf')
@@ -28,10 +30,18 @@ function setup() {
     createCanvas(640, 360)
     colorMode(HSB, 360, 100, 100, 100)
 
+    // now let's get our points out!
+    for (let i = 0; i < 100; i++) {
+        vertices.push(new Vertex(random(width), random(height), random(10, 25)))
+    }
+
 }
 
 function draw() {
     background(209, 80, 30)
+    for (let i = 0; i < 100; i++) {
+        vertices[i].show(mouseX, mouseY)
+    }
 
 }
 
@@ -42,13 +52,26 @@ function draw() {
 //  reduce the number of checks, but since this is O(n) time, it's likely
 //  unnecessary.
 function mousePressed() {
-
+    let numPressed = 0;
+    for (let vertex of vertices) {
+        // oh no... have I been clicked? /scared
+        if (vertex.contains(mouseX, mouseY)) {
+            // I've been clicked and I'm about to flip my face! - Egloo :D » D:
+            // console.log("I've been clicked!!")
+            vertex.pressed(mouseX, mouseY)
+            numPressed++
+        }
+    }
+    console.log(numPressed)
 }
 
 
 // call all our Vertices and make sure they know nothing's clicking them
 function mouseReleased() {
-
+    for (let vertex of vertices) {
+        // now we can all get back to relaxing without that bully of a mouse!
+        vertex.notPressed()
+    }
 }
 
 
@@ -86,31 +109,50 @@ class Vertex {
         this.offsetX = 0
         this.offsetY = 0
         this.dragging = false
+
         this.hovering = false
     }
 
     // (x, y) refers to pointer_x and pointer_y, the coordinates of the
     // mouse dragging; this method will be called as show(mouseX, mouseY)
     show(x, y) {
+        fill(100, 20)
+        stroke(255)
 
+        // have I been clicked? /scared
+        if (this.dragging) {
+            // we need an offset so we can display where we
+            // really were earlier and where the mouse really is. So, we
+            // can't absolutely set this.x to x, we have to have a modifier
+            // to help us detect where we were originally.
+            // see comment where the offsets are for explanation
+
+            this.x = x - this.offsetX
+            this.y = y - this.offsetY
+        }
+
+        circle(this.x, this.y, this.r*2)
     }
 
     // this is called on every Vertex on the canvas. we want to check if the
     // mouse is within our vertex, and if so, update our offsets. the offset
     // is the vector from the origin to the point where the mouse clicked.
     pressed(x, y) {
-
+        this.offsetY = y - this.y
+        this.offsetX = x - this.x
+        this.dragging = true;
     }
 
     // this should be called for every Vertex on the canvas whenever the
     // mouseReleased() event fires. we set our dragging flag to false :)
     notPressed(x, y) {
-
+        this.dragging = false
     }
-
     // a simple "does our Vertex area contain the point where the mouse
     // clicked" boolean function
     contains(x, y) {
-
+        // don't forget the this dots!
+        let d = dist(x, y, this.x, this.y)
+        return d < this.r
     }
 }
