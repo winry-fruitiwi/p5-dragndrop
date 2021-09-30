@@ -51,7 +51,7 @@ function draw() {
 // TODO if there are lots of objects on screen, we can use a quadtree to
 //  reduce the number of checks, but since this is O(n) time, it's likely
 //  unnecessary.
-function mousePressed() {
+function mousePressed() { // bug: doesn't coordinate with mouseMoved at all!
     let numPressed = 0;
     for (let vertex of vertices) {
         // oh no... have I been clicked? /scared
@@ -85,6 +85,19 @@ function mouseMoved() {
 
       in show(), fill transparent if hover is true
      */
+
+    for (let vertex of vertices) {
+        if (vertex.contains(mouseX, mouseY)) {
+            vertex.hovering = true
+        }
+        else {
+            vertex.hovering = false
+        }
+        // just so you know, there's this crazy !! operator. Check it out:
+        // it simplifies my if-else statement like this! One-line stuff!
+        // vertex.hovering = !!vertex.contains(mouseX, mouseY);
+        // please re-search this stuff. Info needed.
+    }
 
 }
 
@@ -129,6 +142,10 @@ class Vertex {
 
             this.x = x - this.offsetX
             this.y = y - this.offsetY
+        }
+
+        if (this.hovering) {
+            fill(100, 10)
         }
 
         circle(this.x, this.y, this.r*2)
